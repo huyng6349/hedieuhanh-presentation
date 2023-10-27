@@ -89,9 +89,9 @@ và hàm `signal()` dùng để thông báo khi tiến trình đã thực hiện
 
 ##### `wait()`
 ```c
-void wait(Semaphore s) {
-  while (s <= 0); // Busy waiting
-  s--;
+void wait(Semaphore* s) {
+  while (*s <= 0); // Busy waiting
+  *s--;
 }
 ```
 
@@ -100,8 +100,8 @@ void wait(Semaphore s) {
 
 ##### `signal()`
 ```c
-void signal(Semaphore s) {
-  s++;
+void signal(Semaphore* s) {
+  *s++;
 }
 ```
 
@@ -319,9 +319,9 @@ void consume() {
 #### 01. Busy waiting
 
 ```c {2}
-void wait(Semaphore s) {
-  while (s <= 0); // Busy waiting
-  s--;
+void wait(Semaphore* s) {
+  while (*s <= 0); // Busy waiting
+  *s--;
 }
 ```
 
@@ -378,3 +378,55 @@ void signal(Semaphore* s) {
 
 Sử dụng **condition variable** để thông báo rằng tiến trình này sẽ bắt đầu đợi,
 điều đó sẽ khiến cho hệ điều hành tự xử lý và sắp xếp cho các tiến trình khác chạy thay vì dành CPU ra chỉ để chạy `while (s <= 0);`.
+
+
+---
+
+## The disadvantages of semaphore
+
+<br>
+
+#### 02. Deadlock
+
+```cpp {all|6-7,14-15|all}
+std::binary_semaphore s1{1};
+std::binary_semaphore s2{1};
+
+int main() {
+  std::jthread t1([]() {
+    s1.acquire(); // wait(&s1);
+    s2.acquire(); // wait(&s2);
+
+    s2.release(); // signal(&s2);
+    s1.release(); // signal(&s1);
+  });
+
+  std::jthread t2([]() {
+    s2.acquire(); // wait(&s2);
+    s1.acquire(); // wait(&s1);
+
+    s1.release(); // signal(&s1);
+    s2.release(); // signal(&s2);
+  });
+}
+```
+
+
+---
+
+## Deadlock
+
+* Đừng để bị deadlock.
+* Sử dụng các thuật toán như [Banker's algorithm](https://en.wikipedia.org/wiki/Banker%27s_algorithm) để tránh bị deadlock.
+
+
+---
+layout: "intro"
+class: "tracking-wide leading-relaxed tab-4"
+---
+
+<div class="text-center text-shadow-lg text-8xl px-2 py-1">
+
+Fin~
+
+</div>

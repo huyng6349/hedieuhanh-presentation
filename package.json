@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "slidev",
-    "build": "slidev build",
+    "build": "slidev build --base /hedieuhanh-presentation",
     "export": "slidev export"
   },
   "dependencies": {
